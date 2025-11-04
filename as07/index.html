@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>as07</title>
+    
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden; /* 防止水平捲軸 */
+        }
+
+        /* 1. 頂部的天藍色區塊 (100vh) */
+        .top-spacer {
+            background: deepskyblue;
+            height: 100vh;
+        }
+
+        /* 2. 用來捲動的主體 (300vh) */
+        .scroll-wrapper {
+            height: 300vh;
+            position: relative; /* 確保 sticky 正常運作 */
+        }
+
+        /* 3. 外層 (底圖：生機) - 關鍵技術點 1 */
+        #outer {
+            /* 這就是範例中 .sticky-top 的效果 */
+            position: sticky;
+            top: 0;
+
+            /* 確保它有 100vh 高度 */
+            height: 100vh;
+            
+            /* 設置底圖 (生機) */
+            background-image: url('life.png'); /* 生機圖 */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            
+            /* 關鍵技術點 2：背景固定 */
+            background-attachment: fixed;
+        }
+
+        /* 4. 內層 (上層圖：破壞) - 關鍵技術點 3 */
+        #statusbar {
+            /* 必須指定高度，才能撐開 #outer */
+            height: 100vh;
+            
+            /* 初始寬度為 0 */
+            width: 0;
+            
+            /* 設置上層圖 (破壞) */
+            background-image: url('damage.png'); /* 破壞圖 */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+
+            /* 關鍵技術點 4：背景也固定 */
+            background-attachment: fixed;
+        }
+
+        /* 5. 底部的灰色區塊 (100vh) */
+        .bottom-spacer {
+            height: 100vh;
+            background: grey;
+        }
+
+        /* 6. 居中、固定的文字 */
+        .overlay-text {
+            position: fixed; /* 固定在視窗中央 */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 3em;
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+            z-index: 10; /* 確保在最上層 */
+            pointer-events: none; /* 讓文字不會擋住滑鼠事件 */
+        }
+        .overlay-text span {
+            display: block; /* 實現換行 */
+            font-size: 0.4em;
+            font-weight: normal;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="top-spacer"></div>
+
+    <div class="scroll-wrapper">
+        
+        <div id="outer">
+            <div id="statusbar"></div>
+        </div>
+
+    </div>
+
+    <div class="bottom-spacer"></div>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    
+    <script>
+        $(document).ready(function () {
+            // 計算最大可捲動距離
+            var max_scroll = $(document).height() - $(window).height();
+            // 獲取視窗寬度
+            var win_w = $(window).width();
+
+            // 監聽捲動事件
+            $(window).scroll(function () {
+                // 獲取目前捲動了多少
+                var scrolled = $(window).scrollTop();
+
+                // 計算新寬度：
+                // (視窗寬度 * 捲動百分比)
+                // 捲動百分比 = (已捲動距離 / 最大可捲動距離)
+                var new_width = (win_w * scrolled) / max_scroll;
+                
+                // 把新寬度套用給 #statusbar
+                $("#statusbar").css({
+                    width: new_width
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鳳凰涅槃：正向與反向捲動</title>
+    <style>
+        /* 1. 基礎重置 (來自你的範例) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow-x: hidden; /* 防止水平捲軸 */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #212529; /* 深色背景 */
+        }
+
+        /* 2. 居中樣式 (來自你的範例) */
+        .text-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            text-align: center;
+            flex-direction: column;
+        }
+
+        /* 3. 頂部橫幅 (來自你的範例) */
+        .banner {
+            height: 100vh;
+            background-color: #0d6efd; /* 範例的 primary */
+        }
+
+        /* 4. 正向捲動容器 (來自你的範例) */
+        .scroll-container {
+            height: 500vh; /* 5張圖，每張圖分配 100vh 的捲動空間 */
+            position: relative;
+        }
+
+        /* 5. 正向捲動軌道 (來自你的範例) */
+        .horizontal-section {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: 500vw; /* 5 個 100vw 的區塊 */
+            display: flex;
+            flex-direction: row;
+            transition: transform 0.1s linear; /* 平滑移動 */
+        }
+
+        /* 6. 正向捲動項目 (來自你的範例) */
+        .horizontal-item {
+            width: 100vw;
+            height: 100vh;
+            flex-shrink: 0; /* 防止縮小 */
+            /* 圖片樣式 */
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* -------------------------------------- */
+        /* ▼▼▼ 你的圖片位置 (正向) ▼▼▼ */
+        .phoenix-1 { background-image: url('Phoenix1.png'); }
+        .phoenix-2 { background-image: url('Phoenix2.png'); }
+        .phoenix-3 { background-image: url('Phoenix3.png'); }
+        .phoenix-4 { background-image: url('Phoenix4.png'); }
+        .phoenix-5 { background-image: url('Phoenix5.png'); }
+        /* ▲▲▲ 你的圖片位置 (正向) ▲▲▲ */
+        /* -------------------------------------- */
+
+
+        /* 7. 頁尾區塊 (來自你的範例) */
+        .vh-100 {
+            height: 100vh;
+        }
+        .bg-dark { background-color: #212529; }
+        .bg-warning { background-color: #ffc107; color: #333; }
+        .bg-info { background-color: #0dcaf0; color: #333; }
+
+
+        /* 8. 反向捲動容器 (來自你的範例) */
+        .scroll-container-reverse {
+            height: 500vh; /* 同樣 5 張圖 */
+            position: relative;
+        }
+
+        /* 9. 反向捲動軌道 (來自你的範例) */
+        .horizontal-section-reverse {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: 500vw; /* 5 個 100vw 的區塊 */
+            display: flex;
+            flex-direction: row;
+            transition: transform 0.1s linear;
+        }
+        
+        /* 反向捲動也使用 .horizontal-item 樣式 */
+
+        /* -------------------------------------- */
+        /* ▼▼▼ 你的圖片位置 (反向) ▼▼▼ */
+        /* 注意：這裡的順序會影響你的故事線。
+           範例的 R Section 1 是第一個被看見的。
+           但 JS 邏輯會讓它從 R Section 5 開始顯示。
+           我會照著範例的 JS 邏輯來安排圖片。
+           JS 會讓捲動時從 p-reverse-5 -> p-reverse-1 這樣「倒帶」。
+           所以 p-reverse-1 應該是「灰燼」，p-reverse-5 是「高飛」。
+        */
+        .p-reverse-1 { background-image: url('Phoenix1.png'); }
+        .p-reverse-2 { background-image: url('Phoenix2.png'); }
+        .p-reverse-3 { background-image: url('Phoenix3.png'); }
+        .p-reverse-4 { background-image: url('Phoenix4.png'); }
+        .p-reverse-5 { background-image: url('Phoenix5.png'); }
+        /* ▲▲▲ 你的圖片位置 (反向) ▲▲▲ */
+        /* -------------------------------------- */
+
+
+    </style>
+</head>
+<body>
+
+    <div class="banner text-center">
+        <h1>phoenix</h1>
+        <p>（第2題 reverse效果）</p>
+    </div>
+
+    <div class="scroll-container">
+        <div class="horizontal-section">
+            <div class="horizontal-item text-center phoenix-1"><h2>灰燼尋育</h2></div>
+            <div class="horizontal-item text-center phoenix-2"><h2>裂殼而出</h2></div>
+            <div class="horizontal-item text-center phoenix-3"><h2>羽化新生</h2></div>
+            <div class="horizontal-item text-center phoenix-4"><h2>蓄勢待發</h2></div>
+            <div class="horizontal-item text-center phoenix-5"><h2>展翅高飛</h2></div>
+        </div>
+    </div>
+
+    <div class="vh-100 bg-dark text-center">在古希臘神話中，Phoenix是一種傳說中的不死鳥。</div>
+    <div class="vh-100 bg-warning text-center">它每隔幾百年就會自焚，然後從灰燼中重生。</div>
+    <div class="vh-100 bg-info text-center">因此象徵著永生、復活和浴火重生。</div>
+
+    <div class="scroll-container-reverse">
+        <div class="horizontal-section-reverse">
+            <div class="horizontal-item text-center p-reverse-1"><h2>灰燼</h2></div>
+            <div class="horizontal-item text-center p-reverse-2"><h2>裂殼</h2></div>
+            <div class="horizontal-item text-center p-reverse-3"><h2>幼鳥</h2></div>
+            <div class="horizontal-item text-center p-reverse-4"><h2>成長</h2></div>
+            <div class="horizontal-item text-center p-reverse-5"><h2>高飛</h2></div>
+        </div>
+    </div>
+
+    <div class="vh-100 bg-dark text-center">郭沫若先生在1921年的詩作中，將Phoenix的浴火重生能力加到了中國的鳳凰身上，從此「Phoenix」就被廣泛用來翻譯「鳳凰」，但這其實是強行牽附的錯誤翻譯。</div>
+    <div class="vh-100 bg-warning text-center">鳳凰是中國古代傳說中的百鳥之王，它通常被描述為雄為鳳、雌為凰，全身五彩斑斕，象徵祥瑞、吉祥、高貴。許多人將二者的特性混淆，而實際上鳳凰並不會浴火重生，也沒有噴射火焰的特點。近年來亦有正名用拼音Fenghuang，而非Phoenix來翻譯鳳凰。</div>
+    <div class="vh-100 bg-info text-center">圖片由Gemini生成。</div>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <script>
+        $(function () {
+            // --- 正向捲動 ---
+            const $scrollContainer = $(".scroll-container");
+            const $horizontalSection = $(".horizontal-section");
+
+            let containerOffsetTop = 0;
+            let containerHeight = 0;
+
+            function updateSizes() {
+                containerOffsetTop = $scrollContainer.offset().top;
+                containerHeight = $scrollContainer.outerHeight() - $(window).height();
+            }
+
+            updateSizes();
+            $(window).on("resize", updateSizes);
+
+            $(window).on("scroll", function () {
+                const scrolled = $(window).scrollTop();
+                let scrollPercentage = 0;
+
+                if (
+                    scrolled > containerOffsetTop &&
+                    scrolled < containerOffsetTop + containerHeight
+                ) {
+                    scrollPercentage = (scrolled - containerOffsetTop) / containerHeight;
+                } else if (scrolled >= containerOffsetTop + containerHeight) {
+                    scrollPercentage = 1;
+                }
+
+                const maxScroll = $horizontalSection.outerWidth() - $(window).width();
+                const horizontalScroll = scrollPercentage * maxScroll;
+
+                $horizontalSection.css("transform", `translateX(-${horizontalScroll}px)`);
+            });
+
+            // --- 反向捲動 ---
+            const $scrollContainerR = $(".scroll-container-reverse");
+            const $horizontalSectionR = $(".horizontal-section-reverse");
+
+            let containerOffsetTopR = 0;
+            let containerHeightR = 0;
+
+            function updateSizesR() {
+                containerOffsetTopR = $scrollContainerR.offset().top;
+                containerHeightR = $scrollContainerR.outerHeight() - $(window).height();
+            }
+
+            updateSizesR();
+            $(window).on("resize", updateSizesR);
+
+            function applyScrollR() {
+                const scrolled = $(window).scrollTop();
+                let scrollPercentage = 0;
+
+                if (
+                    scrolled > containerOffsetTopR &&
+                    scrolled < containerOffsetTopR + containerHeightR
+                ) {
+                    scrollPercentage = (scrolled - containerOffsetTopR) / containerHeightR;
+                } else if (scrolled >= containerOffsetTopR + containerHeightR) {
+                    scrollPercentage = 1;
+                } else if (scrolled <= containerOffsetTopR) {
+                    // ** 這是反向邏輯的關鍵之一：在進入前，進度為 0 **
+                    scrollPercentage = 0; 
+                }
+
+                const maxScroll = $horizontalSectionR.outerWidth() - $(window).width();
+                
+                // ** 這是反向邏輯的核心 **
+                // 捲動 0% 時： horizontalScroll = -maxScroll (瞬間跳到最左邊，也就是 R-5)
+                // 捲動 100% 時：horizontalScroll = -maxScroll + maxScroll = 0 (回到 R-1)
+                const horizontalScroll = -maxScroll + scrollPercentage * maxScroll;
+
+                // ** 注意：這裡是 +${horizontalScroll}px **
+                // 因為 horizontalScroll 本身是個負數，隨捲動慢慢變大 (趨近於 0)
+                $horizontalSectionR.css("transform", `translateX(${horizontalScroll}px)`);
+            }
+
+            // 啟動反向捲動的計算
+            applyScrollR();
+            $(window).on("resize scroll", applyScrollR);
+        });
+    </script>
+
+</body>
+</html>
