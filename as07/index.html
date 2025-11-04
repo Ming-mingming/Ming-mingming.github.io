@@ -6,101 +6,60 @@
     <title>as07</title>
     
     <style>
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow-x: hidden; /* 防止水平捲軸 */
+        body { margin: 0; overflow-x: hidden; }
+        .top-spacer { background: deepskyblue; height: 100vh; }
+        
+        /* 給你的捲動區一個 class，方便 JS 抓取 
+          高度 300vh 不變，這代表你有 200vh 的動畫時間
+        */
+        .scroll-zone {
+            height: 300vh; /* 300vh 保持不變 */
+            position: relative;
         }
 
-        /* 1. 頂部的天藍色區塊 (100vh) */
-        .top-spacer {
-            background: deepskyblue;
-            height: 100vh;
-        }
-
-        /* 2. 用來捲動的主體 (300vh) */
-        .scroll-wrapper {
-            height: 300vh;
-            position: relative; /* 確保 sticky 正常運作 */
-        }
-
-        /* 3. 外層 (底圖：生機) - 關鍵技術點 1 */
         #outer {
-            /* 這就是範例中 .sticky-top 的效果 */
             position: sticky;
             top: 0;
-
-            /* 確保它有 100vh 高度 */
             height: 100vh;
-            
-            /* 設置底圖 (生機) */
-            background-image: url('life.png'); /* 生機圖 */
+            background-image: url('life.png'); /* 生機 */
             background-size: cover;
             background-position: center;
-            background-repeat: no-repeat;
-            
-            /* 關鍵技術點 2：背景固定 */
             background-attachment: fixed;
         }
 
-        /* 4. 內層 (上層圖：破壞) - 關鍵技術點 3 */
         #statusbar {
-            /* 必須指定高度，才能撐開 #outer */
             height: 100vh;
-            
-            /* 初始寬度為 0 */
             width: 0;
-            
-            /* 設置上層圖 (破壞) */
-            background-image: url('damage.png'); /* 破壞圖 */
+            background-image: url('damage.png'); /* 破壞 */
             background-size: cover;
             background-position: center;
-            background-repeat: no-repeat;
-
-            /* 關鍵技術點 4：背景也固定 */
             background-attachment: fixed;
         }
 
-        /* 5. 底部的灰色區塊 (100vh) */
-        .bottom-spacer {
-            height: 100vh;
-            background: grey;
-        }
+        .bottom-spacer { height: 100vh; background: grey; }
 
-        /* 6. 居中、固定的文字 */
         .overlay-text {
-            position: fixed; /* 固定在視窗中央 */
-            top: 50%;
-            left: 50%;
+            position: fixed; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            color: white;
-            font-size: 3em;
-            font-weight: bold;
-            text-align: center;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
-            z-index: 10; /* 確保在最上層 */
-            pointer-events: none; /* 讓文字不會擋住滑鼠事件 */
+            color: white; font-size: 3em; font-weight: bold;
+            text-align: center; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+            z-index: 10; pointer-events: none;
         }
         .overlay-text span {
-            display: block; /* 實現換行 */
-            font-size: 0.4em;
-            font-weight: normal;
-            margin-top: 10px;
-            opacity: 0.9;
+            display: block; font-size: 0.4em;
+            font-weight: normal; margin-top: 10px;
         }
-
     </style>
 </head>
 <body>
 
+
     <div class="top-spacer"></div>
 
-    <div class="scroll-wrapper">
-        
+    <div class="scroll-zone"> 
         <div id="outer">
             <div id="statusbar"></div>
         </div>
-
     </div>
 
     <div class="bottom-spacer"></div>
@@ -110,23 +69,49 @@
     
     <script>
         $(document).ready(function () {
-            // 計算最大可捲動距離
-            var max_scroll = $(document).height() - $(window).height();
-            // 獲取視窗寬度
-            var win_w = $(window).width();
+            
+            const $scrollZone = $(".scroll-zone"); // 抓取 300vh 的捲動區
+            const $statusBar = $("#statusbar");
+            const win_w = $(window).width();
 
-            // 監聽捲動事件
-            $(window).scroll(function () {
-                // 獲取目前捲動了多少
-                var scrolled = $(window).scrollTop();
+            let containerOffsetTop = 0;
+            let containerHeight = 0; // 這是「動畫時間」
 
-                // 計算新寬度：
-                // (視窗寬度 * 捲動百分比)
-                // 捲動百分比 = (已捲動距離 / 最大可捲動距離)
-                var new_width = (win_w * scrolled) / max_scroll;
+            function updateSizes() {
+                containerOffsetTop = $scrollZone.offset().top; // 100vh
                 
-                // 把新寬度套用給 #statusbar
-                $("#statusbar").css({
+                // 關鍵修正：
+                // 動畫時間 = 捲動區高度 - 視窗高度
+                // (300vh - 100vh = 200vh)
+                containerHeight = $scrollZone.outerHeight() - $(window).height();
+            }
+
+            updateSizes();
+            $(window).on("resize", updateSizes);
+
+            $(window).scroll(function () {
+                const scrolled = $(window).scrollTop();
+                let scrollPercentage = 0;
+
+                // 判斷是否在 300vh 的捲動區內
+                if (
+                    scrolled > containerOffsetTop && // 捲過了藍色區塊
+                    scrolled < containerOffsetTop + containerHeight // 還在動畫時間內
+                ) {
+                    // 只計算「動畫時間」內的百分比
+                    // (scrolled - 100vh) / 200vh
+                    scrollPercentage = (scrolled - containerOffsetTop) / containerHeight;
+                } else if (scrolled >= containerOffsetTop + containerHeight) {
+                    // 捲過了，就停在 100%
+                    scrollPercentage = 1;
+                } else {
+                    // 還沒到，就是 0%
+                    scrollPercentage = 0;
+                }
+
+                const new_width = win_w * scrollPercentage;
+                
+                $statusBar.css({
                     width: new_width
                 });
             });
