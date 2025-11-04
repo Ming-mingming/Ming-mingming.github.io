@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>简洁大气网页示例</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f6f8fa;
+            color: #222;
+        }
+        .banner {
+            background: linear-gradient(90deg, #2563eb 60%, #64748b 100%);
+            color: #fff;
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        nav {
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            display: flex;
+            justify-content: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        nav li {
+            margin: 0 32px;
+        }
+        nav a {
+            text-decoration: none;
+            color: #2563eb;
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 18px 0;
+            display: block;
+            transition: color 0.2s, background 0.2s;
+            border-radius: 6px;
+        }
+        nav a:hover {
+            color: #fff;
+            background: #2563eb;
+        }
+        .section {
+            margin-top: 48px;
+        }
+        .section-banner {
+            width: 100vw;
+            margin-left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, #64748b 60%, #2563eb 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            border-radius: 0;
+        }
+        .section-content {
+            background: #fff;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 60px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            border-radius: 0 0 12px 12px;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            min-height: 1800px; /* 内容高度很高，需要滚动多次 */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        /* 锚点修正：每个区段顶部加一个高度等于nav的透明占位 */
+        .anchor-fix {
+            display: block;
+            height: 60px; /* nav高度 */
+            margin-top: -60px;
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="banner" id="home">
+        简洁大气网页 Banner
+    </div>
+    <nav>
+        <ul>
+            <li><a href="#home">首页</a></li>
+            <li><a href="#section1">区段1</a></li>
+            <li><a href="#section2">区段2</a></li>
+            <li><a href="#section3">区段3</a></li>
+        </ul>
+    </nav>
+
+    <span class="anchor-fix" id="section1"></span>
+    <div class="section">
+        <div class="section-banner">区段1 Banner</div>
+        <div class="section-content">
+            <h2>区段1内容</h2>
+            <p>
+                这里是区段1的内容部分。你可以在这里展示一些介绍、说明或其他信息。内容居中显示，并且与页面两侧保持适当距离，提升阅读体验。<br>
+                例如：本区段主要介绍网页设计的基本原则，包括简洁性、易用性和美观性等。
+            </p>
+            <p>
+                这里是更多的区段1内容。你可以继续添加段落、图片、列表等，内容足够多时页面会需要多次滚动才能看完。
+            </p>
+            <p>
+                继续补充区段1内容，模拟长页面效果。<br>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, urna eu tincidunt consectetur, nisi nisl aliquam eros, eu dictum nisi nisl euismod nisi.
+            </p>
+        </div>
+    </div>
+
+    <span class="anchor-fix" id="section2"></span>
+    <div class="section">
+        <div class="section-banner">区段2 Banner</div>
+        <div class="section-content">
+            <h2>区段2内容</h2>
+            <p>
+                这里是区段2的内容部分。你可以在这里添加更多细节或展示不同的内容。<br>
+                例如：本区段可以用于展示产品特点、服务优势或团队介绍等信息。
+            </p>
+            <p>
+                这里是更多的区段2内容。你可以继续添加段落、图片、列表等，内容足够多时页面会需要多次滚动才能看完。
+            </p>
+            <p>
+                继续补充区段2内容，模拟长页面效果。<br>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, urna eu tincidunt consectetur, nisi nisl aliquam eros, eu dictum nisi nisl euismod nisi.
+            </p>
+        </div>
+    </div>
+
+    <span class="anchor-fix" id="section3"></span>
+    <div class="section">
+        <div class="section-banner">区段3 Banner</div>
+        <div class="section-content">
+            <h2>区段3内容</h2>
+            <p>
+                这里是区段3的内容部分。你可以根据实际需求自由发挥。<br>
+                例如：本区段适合放置联系方式、常见问题或其他补充说明。
+            </p>
+            <p>
+                这里是更多的区段3内容。你可以继续添加段落、图片、列表等，内容足够多时页面会需要多次滚动才能看完。
+            </p>
+            <p>
+                继续补充区段3内容，模拟长页面效果。<br>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, urna eu tincidunt consectetur, nisi nisl aliquam eros, eu dictum nisi nisl euismod nisi.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
