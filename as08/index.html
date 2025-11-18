@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urban Scrollytelling Final</title>
+    <style>
+        /* ==================== 
+           1. GLOBAL STYLES & VARIABLES
+           ==================== */
+        :root {
+            --bg-color: #0a0a0a;       /* 极深灰背景 */
+            --text-main: #ffffff;      /* 亮白文字 */
+            --text-muted: #888888;     /* 暗灰辅助文字 */
+            --accent: #00f3ff;         /* 赛博霓虹青 */
+            --glass-bg: rgba(10, 10, 10, 0.75); /* 深色毛玻璃 */
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            overflow-x: hidden; /* 防止横向滚动条 */
+        }
+
+        /* 隐藏滚动条但保留功能 (可选，为了更沉浸的视觉) */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+
+        /* ==================== 
+           2. PROGRESS BAR
+           ==================== */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+            z-index: 9999;
+        }
+        .progress-bar {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            box-shadow: 0 0 10px var(--accent);
+            transition: width 0.1s linear;
+        }
+
+        /* ==================== 
+           3. SECTION 1: LANDING PAGE
+           ==================== */
+        #landing {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+            position: relative;
+            z-index: 10;
+        }
+
+        #landing h1 {
+            font-size: 5vw; /* 响应式字体大小 */
+            font-weight: 900;
+            letter-spacing: -2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        #landing p {
+            font-size: 1.2rem;
+            color: var(--accent);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        /* ==================== 
+           4. SECTION 2: ONBOARDING (SPLIT SCREEN)
+           逻辑：Flex 布局，左 sticky 右 scroll
+           ==================== */
+        #onboarding {
+            display: flex;
+            position: relative;
+            background-color: #000;
+            z-index: 10;
+        }
+
+        /* 左侧：固定区域 (50%) */
+        .split-left {
+            width: 50%;
+            height: 100vh; /* 视口高度 */
+            position: sticky; /* 关键 */
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #222;
+            overflow: hidden;
+        }
+
+        /* 2x2 视频网格 */
+        .video-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            width: 100%;
+            height: 100%;
+        }
+
+        .grid-item {
+            position: relative;
+            border: 1px solid #111;
+            background: #222;
+            overflow: hidden;
+        }
+
+        .grid-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%) contrast(1.2); /* 黑白高反差风格 */
+            opacity: 0.6;
+        }
+
+        /* 右侧：滚动区域 (50%) */
+        .split-right {
+            width: 50%;
+            background: var(--bg-color);
+        }
+
+        .scroll-content {
+            padding: 100px 60px;
+            /* 增加底部 padding 确保最后一段文字能滚到舒服的位置 */
+            padding-bottom: 20vh; 
+        }
+
+        .text-block {
+            margin-bottom: 80vh; /* 这里的巨大间距是为了创造滚动时长 */
+            opacity: 0.3;
+            transition: opacity 0.5s;
+        }
+        
+        /* 简单的 hover 效果模拟 focus，实际可用 JS IntersectionObserver */
+        .text-block:hover { opacity: 1; }
+
+        .text-block h2 {
+            color: var(--accent);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            border-left: 3px solid var(--accent);
+            padding-left: 15px;
+        }
+
+        .text-block p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #ccc;
+        }
+
+        /* ==================== 
+           5. SECTION 3: SHOWCASE (SCROLLYTELLING)
+           逻辑：每个章节高度 > 100vh，视频 sticky，文字从下方滑入
+           ==================== */
+        #showcase-main {
+            position: relative;
+            z-index: 20;
+            background: #000;
+        }
+
+        .chapter {
+            position: relative;
+            height: 200vh; /* 关键点：两倍屏高，给滚动留空间 */
+            width: 100%;
+        }
+
+        /* 背景视频容器 */
+        .chapter-bg {
+            position: sticky; /* 关键点：视频先粘住 */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            z-index: 1; /* 在底层 */
+        }
+
+        .chapter-bg video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.4); /* 压暗背景 */
+        }
+
+        /* 前景文字容器 */
+        .chapter-text-wrapper {
+            position: relative;
+            z-index: 2; /* 在视频上层 */
+            width: 100%;
+            height: 100vh; /* 占满一屏 */
+            
+            /* 布局：让文字处于这一屏的中央 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            
+            /* 核心逻辑：文字容器实际上在视频容器的"下方" (DOM流中)
+               当 sticky 生效时，视频占满视口，文字容器随着父级滚动
+               慢慢滑入视口覆盖在视频上 */
+        }
+
+        .glass-card {
+            width: 600px;
+            max-width: 90%;
+            padding: 50px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px); /* 毛玻璃模糊 */
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-left: 4px solid var(--accent);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: translateY(50px); /* 初始微位移 */
+        }
+
+        .glass-card h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .glass-card p {
+            font-size: 1.1rem;
+            color: #ddd;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            height: 20vh;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            border-top: 1px solid #222;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 顶部进度条 -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- PART 1: Landing Page -->
+    <section id="landing">
+        <h1>URBAN SPECTACLE<br><span style="font-size: 2rem; font-weight: 300; letter-spacing: 10px;">都市景觀</span></h1>
+        <p>In the veins of transit, we are the flow.<br>在公共運輸的血管中，我們是流動的數據。</p>
+    </section>
+
+    <!-- PART 2: Onboarding (Split Screen) -->
+    <section id="onboarding">
+        <!-- 2.1 左侧固定：四宫格视频 -->
+        <div class="split-left">
+            <div class="video-grid">
+                <!-- [素材] 请替换 src -->
+                <div class="grid-item"><video src="video1.mov" autoplay muted loop playsinline></video></div>
+                <div class="grid-item"><video src="video2.mov" autoplay muted loop playsinline></video></div>
+                <div class="grid-item"><video src="video3.mov" autoplay muted loop playsinline></video></div>
+                <div class="grid-item"><video src="video4.mov" autoplay muted loop playsinline></video></div>
+            </div>
+        </div>
+
+        <!-- 2.2 右侧滚动：文字介绍 -->
+        <div class="split-right">
+            <div class="scroll-content">
+                <div class="text-block">
+                    <h2>01. The Frame / 框景</h2>
+                    <p>車窗將城市切割成無數個 16:9 的電影畫面。<br>The window pane acts as a lens, separating the observer from the chaos.</p>
+                    <p>我們安全地躲在玻璃後方，凝視著這一切。</p>
+                </div>
+                <div class="text-block">
+                    <h2>02. White Noise / 白噪音</h2>
+                    <p>引擎的低頻震動，耳機裡的電子樂，與車廂內的沉默交織。<br>The low hum of the engine mixes with the silence of tired commuters.</p>
+                    <p>這是都市最真實的呼吸聲。</p>
+                </div>
+                <div class="text-block">
+                    <h2>03. Immersion / 潛入</h2>
+                    <p>隨著車輛駛入繁華地帶，光線開始改變。<br>As we approach the commercial district, the lights intensify.</p>
+                    <p>準備好，我們將潛入這片由霓虹與慾望所構成的深海。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PART 3: Showcase (Scrollytelling) -->
+    <div id="showcase-main">
+        
+        <!-- Chapter 1 -->
+        <article class="chapter">
+            <!-- 背景视频 (Sticky) -->
+            <div class="chapter-bg">
+                <!-- [素材] 替换为你的全屏视频 -->
+                <video src="video2.mov" autoplay muted loop playsinline></video>
+            </div>
+            <!-- 前景文字 (Scrolls up) -->
+            <div class="chapter-text-wrapper">
+                <div class="glass-card">
+                    <h2>The Vessel<br><span style="font-size:1.2rem; color:var(--accent);">載體</span></h2>
+                    <p>搖晃的金屬盒子，裝載著無數個疲憊的靈魂。</p>
+                    <p>We pack ourselves into this steel container. 彼此緊鄰的體溫，卻是全世界最遙遠的距離。每個人都是一座孤島，在此刻短暫交會。</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- Chapter 2 -->
+        <article class="chapter">
+            <div class="chapter-bg">
+                <video src="video3.mov" autoplay muted loop playsinline style="filter: hue-rotate(90deg) brightness(0.4);"></video>
+            </div>
+            <div class="chapter-text-wrapper">
+                <div class="glass-card">
+                    <h2>Velocity<br><span style="font-size:1.2rem; color:var(--accent);">速度與殘影</span></h2>
+                    <p>人臉被速度拉成了線條，溫度固定成牆上的畫報。我們的輪廓模糊了，變成了流動的光譜。</p>
+                    <p>Blurring lines of architecture. 時間在這裡被壓縮。我們懸浮在起點與終點之間的虛無裡，不僅在空間中移動，更像是在時間中穿梭。</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- Chapter 3 -->
+        <article class="chapter">
+            <div class="chapter-bg">
+                <video src="video4.mov" autoplay muted loop playsinline style="filter: hue-rotate(180deg) brightness(0.4);"></video>
+            </div>
+            <div class="chapter-text-wrapper">
+                <div class="glass-card">
+                    <h2>Infiltration<br><span style="font-size:1.2rem; color:var(--accent);">符號與消費</span></h2>
+                    <p>巨大的 LED 螢幕照亮了夜空。模特兒的完美臉孔俯視著芸芸眾生，販賣著我們買不起的夢想。</p>
+                    <p>Neon gods selling dreams. 資本的觸手無孔不入，穿透車窗，刺入視網膜。商業景觀成為了這座城市的皮膚，而我們是名為「消費者」的細胞。</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- Chapter 4 -->
+        <article class="chapter">
+            <div class="chapter-bg">
+                <video src="video1.mov" autoplay muted loop playsinline style="filter: hue-rotate(270deg) brightness(0.4);"></video>
+            </div>
+            <div class="chapter-text-wrapper">
+                <div class="glass-card">
+                    <h2>The Loop<br><span style="font-size:1.2rem; color:var(--accent);">迴圈</span></h2>
+                    <p>車門開啟，冷空氣湧入。我們走出車廂，再次融入洶湧的人海。</p>
+                    <p>Back to the flow. 這趟旅程結束了，但城市的運作永不停歇。我們既是觀察者，也是這巨大景觀的一部分。</p>
+                </div>
+            </div>
+        </article>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Storytelling with videos 
+        本作品想要展示的是公共交通中川流不息的人們與都市巨大商業元素在一起的景觀。 
+        創意及視頻素材均由本人提供、本人拍攝。文本由Gemini生成。有路人出鏡,不過無意侵犯肖像權。</p>
+    <script>
+        // 简单的进度条 JS
+        window.onscroll = function() {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            document.getElementById("progressBar").style.width = scrolled + "%";
+        };
+    </script>
+</body>
+</html>
